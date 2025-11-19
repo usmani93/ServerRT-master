@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <link rel="stylesheet" href="client.css" /> -->
+    <style>
+        .userCallButton {
+            margin-right: 8px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        .userCallButton[disabled] {
+            opacity: 0.5;
+            cursor: default;
+        }
+        .inCallLabel {
+            font-weight: bold;
+            color: #c00;
+            margin-left: 6px;
+        }
+    </style>
+    <title>Realtime communication with WebRTC</title>
+
+</head>
+
+<body>
+
+    <h1>Realtime communication with WebRTC</h1>
+    <h2 id="connectionId">Connecting...</h2>
+
+    <ul id="connectedUsers"></ul>
+
+    <video id="outgoingVideo" autoplay playsinline class="outgoingVideo"></video>
+    <video id="incomingVideo" autoplay playsinline class="incomingVideo"></video>
+
+    <div>
+        <button id="connectButton">Connect</button>
+        <button id="startButton">Start</button>
+        <button id="callButton">Call</button>
+        <button id="hangupButton">Hang Up</button>
+    </div>
+
+    <div>
+        <label>User Name: </label>
+        <input id="userName" />
+    </div>
+    <div>
+        <label>Connected as: </label>
+        <span id="connectedName">(not connected)</span>
+    </div>
+    <div>
+        <label>Message: </label>
+        <input id="message" />
+    </div>
+
+    <div>
+        <button onclick="getId()">Get Id</button>
+        <button id="sendMessageButton">Send Message</button>
+        <button id="disconnectButton">Disconnect</button>
+    </div>
+
+    <div>
+        <label id="messageReceived"></label>
+    </div>
+
+    <script src="signalr.js"></script>
+    <script src="client.js"></script>
+</body>
+
+</html>
+
+<!-- Incoming call modal -->
+<div id="incomingModal" style="display:none; position:fixed; left:50%; top:30%; transform:translate(-50%, -30%); background:#fff; border:1px solid #ccc; padding:16px; z-index:1000;">
+    <p id="incomingText">Incoming call...</p>
+    <div>
+        <button id="acceptCallButton">Accept</button>
+        <button id="declineCallButton">Decline</button>
+    </div>
+</div>
