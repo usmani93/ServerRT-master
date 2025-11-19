@@ -87,7 +87,7 @@ async function startConnection() {
     try {
         await hubConnection.start();
         isConnected = true;
-        connectionId.innerHTML = hubConnection.connectionId;
+        connectionId.innerHTML = hubConnection.Username;
         console.log("SignalR Connected.");
         // show connected name if available
         const name = (userInput && userInput.value && userInput.value.trim()) ? userInput.value.trim() : 'Anonymous';
