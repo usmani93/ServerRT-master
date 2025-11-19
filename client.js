@@ -92,6 +92,7 @@ async function startConnection() {
         const name = (userInput && userInput.value && userInput.value.trim()) ? userInput.value.trim() : 'Anonymous';
         const connectedNameEl = document.getElementById('connectedName');
         if (connectedNameEl) connectedNameEl.textContent = name;
+        connectionId.innerHTML = name;
         // Join the hub with the entered name
         hubConnection.invoke("Join", name).then(() => getMediaDevices()).catch(err => console.log(err));
         setUIState();
@@ -178,7 +179,6 @@ hubConnection.on('updateUserList', (userList) => {
         let userName = document.createElement('div');
         userName.className = 'user-name';
         userName.textContent = item.username;
-        connectionId.innerHTML = item.username;
 
         let userId = document.createElement('div');
         userId.className = 'user-id';
@@ -438,6 +438,7 @@ const closeConnection = (partnerClientId) => {
         // Close the connection
         try { connection.close(); } catch (e) { }
         delete connections[partnerClientId]; // Remove the property
+        setUIState();
     }
 }
 
