@@ -5,7 +5,6 @@ const messageInput = document.getElementById('message');
 const showMessage = document.getElementById('messageReceived');
 const connectionId = document.getElementById('connectionId');
 const connectedUsers = document.getElementById('connectedUsers');
-const startButton = document.getElementById('startButton');
 const callButton = document.getElementById('callButton');
 const hangupButton = document.getElementById('hangupButton');
 let localPeerConnection;
@@ -70,8 +69,6 @@ function setUIState() {
     const connectButton = document.getElementById('connectButton');
     const sendMessageButton = document.getElementById('sendMessageButton');
     const disconnectButton = document.getElementById('disconnectButton');
-    // Buttons that control calls
-    startButton.disabled = !isConnected;
     callButton.disabled = !isConnected || inCall;
     hangupButton.disabled = !isConnected || !inCall;
     if (connectButton) connectButton.disabled = isConnected;
@@ -240,10 +237,8 @@ function onclickUser(item) {
         // Initiate a call
         hubConnection.invoke('CallUser', { "connectionId": targetConnectionId.connectionId });
         // UI in calling mode
-        startButton.innerText = "In Call";
     } else {
         console.log("Ah, nope.  Can't call yourself.");
-        startButton.innerText = "Start";
     }
 }
 
