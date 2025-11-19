@@ -317,7 +317,7 @@ hubConnection.on('incomingCall', (callingUser) => {
 hangupButton.onclick = (function () {
     console.log('hangup....');
     // Only allow hangup if we are not idle
-    hubConnection.invoke('hangUp');
+    hubConnection.invoke('HangUp');
     // Close all peer connections locally
     closeAllConnections();
     inCall = false;
