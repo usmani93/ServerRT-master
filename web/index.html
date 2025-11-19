@@ -1,66 +1,525 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <!-- <link rel="stylesheet" href="client.css" /> -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Video Call</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        .userCallButton {
-            margin-right: 8px;
-            padding: 4px 8px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066cc;
+            --primary-hover: #0052a3;
+            --success: #16a34a;
+            --success-hover: #15803d;
+            --danger: #dc2626;
+            --danger-hover: #b91c1c;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.5;
+            color: var(--gray-900);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .connection-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 100px;
+            font-size: 14px;
+            color: white;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #16a34a;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .video-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .video-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .video-container {
+            position: relative;
+            background: var(--gray-900);
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 16/9;
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-label {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .card-header {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--gray-300);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: all 0.15s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 204, 0.1);
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .userCallButton[disabled] {
+
+        button:disabled {
             opacity: 0.5;
-            cursor: default;
+            cursor: not-allowed;
         }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: var(--success-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: var(--danger-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--gray-200);
+            color: var(--gray-700);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: var(--gray-300);
+        }
+
+        .user-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .user-list:empty::after {
+            content: 'No users connected';
+            display: block;
+            text-align: center;
+            color: var(--gray-400);
+            padding: 24px;
+            font-size: 14px;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            transition: background 0.15s ease;
+        }
+
+        .user-item:hover {
+            background: var(--gray-100);
+        }
+
+        .userCallButton {
+            flex-shrink: 0;
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--gray-900);
+            font-size: 14px;
+        }
+
+        .user-id {
+            font-size: 11px;
+            color: var(--gray-500);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
         .inCallLabel {
-            font-weight: bold;
-            color: #c00;
-            margin-left: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--danger);
+            background: rgba(220, 38, 38, 0.1);
+            padding: 2px 8px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        .status-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--gray-50);
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .status-info strong {
+            color: var(--gray-700);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--shadow-xl);
+            max-width: 400px;
+            width: calc(100% - 48px);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-900);
+            margin-bottom: 12px;
+        }
+
+        .modal-text {
+            font-size: 15px;
+            color: var(--gray-600);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .video-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 16px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .card, .video-section {
+                padding: 16px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .controls button {
+                width: 100%;
+            }
         }
     </style>
-    <title>Realtime communication with WebRTC</title>
-
 </head>
 
 <body>
+    <div class="container">
+        <header>
+            <h1>WebRTC Video Call</h1>
+            <div class="connection-status">
+                <span class="status-dot"></span>
+                <span id="connectionId">Connecting...</span>
+            </div>
+        </header>
 
-    <h1>Realtime communication with WebRTC</h1>
-    <h2 id="connectionId">Connecting...</h2>
+        <div class="main-content">
+            <div class="video-section">
+                <div class="video-grid">
+                    <div class="video-container">
+                        <video id="outgoingVideo" autoplay playsinline muted></video>
+                        <div class="video-label">You</div>
+                    </div>
+                    <div class="video-container">
+                        <video id="incomingVideo" autoplay playsinline></video>
+                        <div class="video-label">Remote</div>
+                    </div>
+                </div>
 
-    <ul id="connectedUsers"></ul>
+                <div class="controls">
+                    <button id="startButton" class="btn-primary">Start Video</button>
+                    <button id="callButton" class="btn-success">Call User</button>
+                    <button id="hangupButton" class="btn-danger">Hang Up</button>
+                </div>
+            </div>
 
-    <video id="outgoingVideo" autoplay playsinline class="outgoingVideo"></video>
-    <video id="incomingVideo" autoplay playsinline class="incomingVideo"></video>
+            <div class="sidebar">
+                <div class="card">
+                    <div class="card-header">Connection</div>
 
-    <div>
-        <button id="connectButton">Connect</button>
-        <button id="startButton">Start</button>
-        <button id="callButton">Call</button>
-        <button id="hangupButton">Hang Up</button>
+                    <div class="form-group">
+                        <label for="userName">Your Name</label>
+                        <input type="text" id="userName" placeholder="Enter your name">
+                    </div>
+
+                    <div class="form-group">
+                        <button id="connectButton" class="btn-primary" style="width: 100%">Connect</button>
+                    </div>
+
+                    <div class="status-info">
+                        <strong>Status:</strong>
+                        <span id="connectedName">(not connected)</span>
+                    </div>
+
+                    <div class="form-group" style="margin-top: 16px;">
+                        <button id="disconnectButton" class="btn-secondary" style="width: 100%">Disconnect</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Connected Users</div>
+                    <ul id="connectedUsers" class="user-list"></ul>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">Messaging</div>
+
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <input type="text" id="message" placeholder="Type a message">
+                    </div>
+
+                    <button id="sendMessageButton" class="btn-primary" style="width: 100%">Send Message</button>
+
+                    <div id="messageReceived" style="margin-top: 12px; font-size: 13px; color: var(--gray-600);"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div>
-        <label>User Name: </label>
-        <input id="userName" />
-    </div>
-    <div>
-        <label>Connected as: </label>
-        <span id="connectedName">(not connected)</span>
-    </div>
-    <div>
-        <label>Message: </label>
-        <input id="message" />
-    </div>
-
-    <div>
-        <button onclick="getId()">Get Id</button>
-        <button id="sendMessageButton">Send Message</button>
-        <button id="disconnectButton">Disconnect</button>
-    </div>
-
-    <div>
-        <label id="messageReceived"></label>
+    <div id="incomingModal" style="display:none;" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-title">Incoming Call</div>
+            <p id="incomingText" class="modal-text">Someone is calling you...</p>
+            <div class="modal-actions">
+                <button id="declineCallButton" class="btn-danger">Decline</button>
+                <button id="acceptCallButton" class="btn-success">Accept</button>
+            </div>
+        </div>
     </div>
 
     <script src="signalr.js"></script>
@@ -68,12 +527,3 @@
 </body>
 
 </html>
-
-<!-- Incoming call modal -->
-<div id="incomingModal" style="display:none; position:fixed; left:50%; top:30%; transform:translate(-50%, -30%); background:#fff; border:1px solid #ccc; padding:16px; z-index:1000;">
-    <p id="incomingText">Incoming call...</p>
-    <div>
-        <button id="acceptCallButton">Accept</button>
-        <button id="declineCallButton">Decline</button>
-    </div>
-</div>

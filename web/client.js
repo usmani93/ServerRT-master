@@ -155,18 +155,15 @@ function getId() {
 }
 
 hubConnection.on('updateUserList', (userList) => {
-    //console.log(JSON.stringify(userList));
     connectedUsers.innerHTML = "";
     console.log('SignalR: called updateUserList' + JSON.stringify(userList));
     userList.forEach((item) => {
         let li = document.createElement("li");
-        li.id = "userId";
+        li.className = "user-item";
 
-        // Create per-user Call button at the front
         let callBtn = document.createElement('button');
         callBtn.textContent = 'Call';
-        callBtn.className = 'userCallButton';
-        // Set per-user incall flag on the button for later UI updates
+        callBtn.className = 'userCallButton btn-primary';
         callBtn.dataset.incall = item.inCall ? '1' : '0';
 
         callBtn.addEventListener('click', (e) => {
@@ -174,31 +171,37 @@ hubConnection.on('updateUserList', (userList) => {
             const target = item;
             if (target.connectionId != connectionId.innerText) {
                 hubConnection.invoke('CallUser', { "connectionId": target.connectionId });
-                startButton.innerText = "In Call";
             } else {
                 console.log("Ah, nope.  Can't call yourself.");
-                startButton.innerText = "Start";
             }
         }, false);
 
-        // Add text for the user
-        let userText = document.createElement('span');
-        userText.textContent = item.username + " " + item.connectionId;
+        let userInfo = document.createElement('div');
+        userInfo.className = 'user-info';
 
-        // Add small label if this user is currently in a call
-        if (item.inCall) {
-            let inCallLabel = document.createElement('span');
-            inCallLabel.textContent = ' (In Call)';
-            inCallLabel.style.color = 'red';
-            inCallLabel.className = 'inCallLabel';
-            userText.appendChild(inCallLabel);
-        }
+        let userName = document.createElement('div');
+        userName.className = 'user-name';
+        userName.textContent = item.username;
+
+        let userId = document.createElement('div');
+        userId.className = 'user-id';
+        userId.textContent = item.connectionId;
+
+        userInfo.appendChild(userName);
+        userInfo.appendChild(userId);
 
         li.appendChild(callBtn);
-        li.appendChild(userText);
+        li.appendChild(userInfo);
+
+        if (item.inCall) {
+            let inCallLabel = document.createElement('span');
+            inCallLabel.textContent = 'In Call';
+            inCallLabel.className = 'inCallLabel';
+            li.appendChild(inCallLabel);
+        }
+
         connectedUsers.appendChild(li);
     });
-    // Ensure UI reflects current connection and per-user states immediately
     setUIState();
 });
 
