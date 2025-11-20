@@ -438,6 +438,7 @@ const closeConnection = (partnerClientId) => {
         // Close the connection
         try { connection.close(); } catch (e) { }
         delete connections[partnerClientId]; // Remove the property
+        connection.removeIceCandidate(null);
         setUIState();
     }
 }
